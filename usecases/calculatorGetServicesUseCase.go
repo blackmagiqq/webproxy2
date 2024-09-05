@@ -1,27 +1,46 @@
 package usecases
 
 import (
-	"github.com/blackmagiqq/webproxy2/services"
+	"encoding/json"
+	"fmt"
+
+	"github.com/blackmagiqq/webproxy2/dto"
 )
 
-const uri = "/api/calculator/getServices"
-
-type CalculatorGetServicesUseCase struct {
-	APIService *services.APIService
+type APIService interface {
+	Handle(url string, method string, headers map[string]string, body interface{}) (*dto.APIResponse, error)
 }
 
-func (useCase *CalculatorGetServicesUseCase) Handle(
-	host string, body interface{},
+func NewCalculatorGetServicesUseCase(host string, apiService APIService) *CalculatorGetServicesUseCase {
+	return &CalculatorGetServicesUseCase{
+		url:        host + "/api/calculator/getServices",
+		method:     "POST",
+		apiService: apiService,
+	}
+}
+
+type CalculatorGetServicesUseCase struct {
+	url        string
+	method     string
+	apiService APIService
+}
+
+func (u *CalculatorGetServicesUseCase) Handle(
 	headers map[string]string,
-) (interface{}, error) {
-	services, err := useCase.APIService.Handle(
-		host+uri,
-		"POST",
-		headers,
+	body *dto.CalculatorGetServicesRequest,
+) (*dto.CalculatorGetServicesResponse, error) {
+	response, err := u.apiService.Handle(
+		u.url,
+		u.method, headers,
 		body,
 	)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("calculator getServices useCase API service: %w", err)
 	}
-	return services, nil
+
+	responseDTO := new(dto.CalculatorGetServicesResponse)
+	if err := json.Unmarshal(response.Body, responseDTO); err != nil {
+		return nil, fmt.Errorf("calculator getServices useCase unparse response: %w", err)
+	}
+	return responseDTO, nil
 }

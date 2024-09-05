@@ -9,3 +9,9 @@ services:
       - type: bind
         source: .
         target: /var/www/html
+    networks: 
+      - webproxy2
+
+networks:
+  webproxy2:
+    driver: bridge
