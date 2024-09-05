@@ -1,0 +1,9 @@
+with-expecter: true
+packages:
+    github.com/blackmagiqq/webproxy2/usecases:
+        interfaces:
+            APIService:
+                config:
+                  with-expecter: true
+                  outpkg: "mocks"
+                  dir: "mocks/"
